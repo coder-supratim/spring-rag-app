@@ -6,8 +6,7 @@ import org.springframework.ai.reader.ExtractedTextFormatter;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.RedisVectorStore;
+import org.springframework.ai.vectorstore.redis.RedisVectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -26,7 +25,8 @@ public class DataLoaderService {
     private Resource pdfResource;
 
     @Autowired
-    private VectorStore vectorStore;
+    private RedisVectorStore vectorStore;
+
 
     public void load() {
         PagePdfDocumentReader pdfReader = new PagePdfDocumentReader(this.pdfResource,
@@ -43,7 +43,7 @@ public class DataLoaderService {
 
 
     public void deleteAll(String keyPattern) {
-        JedisPooled jedisPooled = ((RedisVectorStore)vectorStore).getJedis();
+        JedisPooled jedisPooled = vectorStore.getJedis();
         ScanParams scanParams = new ScanParams().match(keyPattern);
         String cursor = scanParams.SCAN_POINTER_START;
         do {
